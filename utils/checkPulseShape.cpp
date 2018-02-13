@@ -1,3 +1,6 @@
+#include <iostream>
+#include <stdlib.h>
+
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1D.h"
@@ -6,34 +9,65 @@
 
 
 
-int main() {
+int main( int argc, char* argv[] ) {
 
-  TFile* file = TFile::Open("prova.root");
+  if( argc!= 4 ) {
+    std::cout << "USAGE: ./checkPulseShape [filename] [event] [channel]" << std::endl;
+    exit(1);
+  }
+
+  std::string fileName(argv[1]);
+  int event  (atoi(argv[2]));
+  int channel(atoi(argv[3]));
+
+
+  TFile* file = TFile::Open(fileName.c_str());
   TTree* tree = (TTree*)file->Get("tree");
+
+  std::cout << "-> Opened file " << fileName.c_str() << std::endl;
+  std::cout << "-> Will check pulse shape of event: " << event << ", channel: " << channel << std::endl;
 
   TCanvas* c1 = new TCanvas("c1", "c1", 600, 600);
   c1->cd();
 
+  int ev;
+  int nch;
   float pshape[128][1024];
 
+  tree->SetBranchAddress( "ev" , &ev     );
+  tree->SetBranchAddress( "nch"   , &nch    );
   tree->SetBranchAddress( "pshape", &pshape );
-
-  tree->GetEntry(0);
 
   TH1D* h1 = new TH1D("h1", "", 1024, 0., 1024. );
 
+  int nentries = tree->GetEntries();
 
-  for( unsigned i=0; i<1024; ++i ) {
+  for( unsigned iEntry=0; iEntry<nentries; ++iEntry ) {
 
-    h1->SetBinContent( i+1, pshape[0][i] );
+    tree->GetEntry(iEntry);
 
-  }
+    if( ev!=event ) continue;
+    if( channel>=nch ) {
+      std::cout << "Event " << ev << " does not have channel " << channel << " (nch=" << nch << ")." << std::endl;
+      exit(11);
+    }
+
+    for( unsigned i=0; i<1024; ++i ) 
+      h1->SetBinContent( i+1, pshape[channel][i] );
+
+  } // for entries
 
 
   h1->Draw();
+  
+  size_t pos = 0;
+  std::string prefix;
+  if((pos = fileName.find(".")) != std::string::npos) {
+    prefix = fileName.substr(0, pos);
+  }
 
-  c1->SaveAs("pshape.eps");
-  c1->SaveAs("pshape.pdf");
+  c1->SaveAs(Form("%s_ev%d_ch%d.eps",prefix.c_str(),event,channel));
+  c1->SaveAs(Form("%s_ev%d_ch%d.pdf",prefix.c_str(),event,channel));
 
   return 0;
 

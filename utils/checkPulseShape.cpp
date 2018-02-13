@@ -12,7 +12,7 @@
 int main( int argc, char* argv[] ) {
 
   if( argc!= 4 ) {
-    std::cout << "USAGE: ./checkPulseShape [filename] [event] [channel]" << std::endl;
+    std::cout << "USAGE: ./checkPulseShape [rootFileName] [event] [channel]" << std::endl;
     exit(1);
   }
 

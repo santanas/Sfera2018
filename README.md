@@ -1,6 +1,6 @@
 # Welcome to the repository of Sfera2018
 
-Change directory to `utils` and there you will find two programs:
+Change directory to `analysis` and there you will find two programs:
 `asciToTree.cpp` is the program that reads an ascii measurements file and converts it to a ROOT TTree;
 `checkPulseShape.cpp` will plot a single pulse shape, to check that everything is OK.
 

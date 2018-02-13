@@ -20,8 +20,24 @@ int main( int argc, char* argv[] ) {
 
   std::string fileName(argv[1]);
 
-  TFile* outfile = TFile::Open( "prova.root", "recreate" );
+  std::ifstream fs(Form("../data/%s", fileName.c_str()));
+  if( !fs.good() ) {
+    std::cout << "-> No file called '" << fileName << "' found in '../data/'. Exiting." << std::endl;
+    exit(1);
+  }
+
+  std::cout << "-> Opened ascii data file: " << fileName << std::endl;
+
+  size_t pos = 0;
+  std::string outfileName;
+  if((pos = fileName.find(".")) != std::string::npos) {
+    std::string prefix = fileName.substr(0, pos);
+    outfileName = prefix + ".root";
+  }
+
+  TFile* outfile = TFile::Open( outfileName.c_str(), "recreate" );
   TTree* tree = new TTree( "tree", "" );
+
 
   int ev;
   int fcr;
@@ -32,6 +48,7 @@ int main( int argc, char* argv[] ) {
   float letime   [128];
   float tetime   [128];
   float ratecount[128];
+  float pshape   [128][1024];
 
   tree->Branch( "ev"       , &ev      , "ev/I"            );
   tree->Branch( "fcr"      , &fcr     , "fcr/I"           );
@@ -42,9 +59,8 @@ int main( int argc, char* argv[] ) {
   tree->Branch( "letime"   , letime   , "letime[nch]/F"   );
   tree->Branch( "tetime"   , tetime   , "tetime[nch]/F"   );
   tree->Branch( "ratecount", ratecount, "ratecount[nch]/F");
+  tree->Branch( "pshape"   , pshape   , "pshape[nch][1024]/F");
 
-
-  std::ifstream fs(fileName.c_str());
 
   std::string line;
   bool wasReadingEvent = false;
@@ -54,10 +70,11 @@ int main( int argc, char* argv[] ) {
 
   if( fs.good() ) {
 
+    std::cout << "-> Starting parsing file." << std::endl;
+
     while( getline(fs,line) ) {
 
       std::string delimiter = " ";
-      
       size_t pos = 0;
       std::vector<std::string> words;
       std::string word;
@@ -70,6 +87,7 @@ int main( int argc, char* argv[] ) {
 
       if( words[0]=="===" && words[1]=="EVENT" && wasReadingEvent ) {
 
+        if( ev % 50 == 0 ) std::cout << "   event: " << ev << std::endl;
         tree->Fill();
         nch = 0;
         ch = -1;
@@ -95,8 +113,9 @@ int main( int argc, char* argv[] ) {
 
       } else if( readyForPulseShape && ch>=0 ) {
   
-        //myarray = np.fromstring(line, dtype=float, sep=' ')
-        //print(myarray)
+        for( unsigned i=0; i<words.size(); ++i ) 
+          pshape[ch][i] = atof(words[i].c_str());
+
         readyForPulseShape = false;
    
       }
@@ -114,79 +133,9 @@ int main( int argc, char* argv[] ) {
   tree->Write();
   outfile->Close();
 
+  std::cout << "-> Tree saved in: " << outfile->GetName() << std::endl;
+
   return 0;
 
 }
 
-
-/*
-
-    OUTFILE = tfILE( 'PROVA.ROOT', 'RECREATE' )
-    tree = TTree('t', '')
-
-
-
-    nsamp = 1024
-    pshape = np.zeros(nsamp*maxch).reshape(nsamp,maxch)
-
-    tree.Branch( 'pshape', pshape, 'pshape[nch][nsamp]/F')
-
-
-    lines=f.readlines()
-
-    wasReadingEvent = False
-    readyForPulseShape = False
-    ch = -1
-
-    for line in lines:
-
-        if len(line.split('=== EVENT'))>1 and wasReadingEvent:
-
-          print('in first if')
-          tree.Fill()
-          nch[0] = 0
-          ch = -1
-          #nch       = array( 'i', [ 0 ] )
-          #base      = array( 'f', maxch*[ 0. ] )
-          #vamp      = array( 'f', maxch*[ 0. ] )
-          #vcharge   = array( 'f', maxch*[ 0. ] )
-          #letime    = array( 'f', maxch*[ 0. ] )
-          #tetime    = array( 'f', maxch*[ 0. ] )
-          #ratecount = array( 'f', maxch*[ 0. ] )
-          wasReadingEvent = False
-
-
-        elif len(line.split('=== CH: '))>1:
-
-          wasReadingEvent = True
-          readyForPulseShape = True
-
-          nch[0] += 1
-
-          words = line.split(' ')
-
-
-          ch         = int(words[2])
-          ev         = words[4]
-          fcr        = words[6]
-          base     [ch] = float(words[8])
-          vamp     [ch] = float(words[11])
-          vcharge  [ch] = float(words[14])
-          letime   [ch] = float(words[17])
-          tetime   [ch] = float(words[20])
-          ratecount[ch] = float(words[23])
-
-        elif readyForPulseShape and ch>=0:
-  
-          myarray = np.fromstring(line, dtype=float, sep=' ')
-          print(myarray)
-          readyForPulseShape = False
-   
-
-    if wasReadingEvent:
-      tree.Fill()
-
-    outfile.Write()
-    outfile.Close()
-
-*/

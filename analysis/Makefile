@@ -17,3 +17,12 @@ asciiToTree: asciiToTree.cpp
 checkPulseShape: checkPulseShape.cpp 
 	$(CC) -Wall $(INCLUDES) -o checkPulseShape checkPulseShape.cpp $(ROOTFLAG) $(EXTRALIBS)
 
+
+
+all: asciiToTree checkPulseShape
+
+
+clean:
+	rm asciiToTree checkPulseShape
+
+

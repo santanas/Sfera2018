@@ -63,7 +63,6 @@ int main( int argc, char* argv[] ) {
 
 
   std::string line;
-  bool firstEvent = true;
   bool wasReadingEvent = false;
   bool readyForPulseShape = false;
   int ch = -1;
@@ -72,6 +71,7 @@ int main( int argc, char* argv[] ) {
   if( fs.good() ) {
 
     std::cout << "-> Starting parsing file." << std::endl;
+    nch=0;
 
     while( getline(fs,line) ) {
 
@@ -88,15 +88,13 @@ int main( int argc, char* argv[] ) {
 
       if( words[0]=="===" && words[1]=="EVENT" && wasReadingEvent ) {
 
-        if( ev % 50 == 0 ) std::cout << "   event: " << ev << std::endl;
+        if( ev % 25 == 0 ) std::cout << "   ... analyzing event: " << ev << std::endl;
 
-        if( !firstEvent )
-          tree->Fill();
+        tree->Fill();
  
         nch = 0;
         ch = -1;
         wasReadingEvent = false;
-        firstEvent = false;
 
       } else if( words[0]=="===" && words[1]=="CH:" ) {
 

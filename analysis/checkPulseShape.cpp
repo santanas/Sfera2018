@@ -66,8 +66,11 @@ int main( int argc, char* argv[] ) {
     prefix = fileName.substr(0, pos);
   }
 
-  c1->SaveAs(Form("%s_ev%d_ch%d.eps",prefix.c_str(),event,channel));
-  c1->SaveAs(Form("%s_ev%d_ch%d.pdf",prefix.c_str(),event,channel));
+  std::string plotsDir(Form("plots/%s", prefix.c_str()));
+  system( Form("mkdir -p %s", plotsDir.c_str()) );
+
+  c1->SaveAs(Form("%s/pulseShape_ev%d_ch%d.eps",plotsDir.c_str(),event,channel));
+  c1->SaveAs(Form("%s/pulseShape_ev%d_ch%d.pdf",plotsDir.c_str(),event,channel));
 
   return 0;
 

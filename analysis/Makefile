@@ -14,12 +14,15 @@ EXTRALIBS := -L$(ROOTSYS)/lib -L$(ROOFIT_LIBDIR)/ -lHtml -lMathCore -lGenVector 
 asciiToTree: asciiToTree.cpp 
 	$(CC) -Wall $(INCLUDES) -o asciiToTree asciiToTree.cpp $(ROOTFLAG) $(EXTRALIBS)
 
+measToTree: measToTree.cpp 
+	$(CC) -Wall $(INCLUDES) -o measToTree measToTree.cpp $(ROOTFLAG) $(EXTRALIBS)
+
 checkPulseShape: checkPulseShape.cpp 
 	$(CC) -Wall $(INCLUDES) -o checkPulseShape checkPulseShape.cpp $(ROOTFLAG) $(EXTRALIBS)
 
 
 
-all: asciiToTree checkPulseShape
+all: asciiToTree checkPulseShape measToTree
 
 
 clean:

@@ -40,7 +40,6 @@ int main( int argc, char* argv[] ) {
 
 
   int ev;
-  int fcr;
   int nch;
   float base     [128];
   float vamp     [128];
@@ -51,7 +50,6 @@ int main( int argc, char* argv[] ) {
   float pshape   [128][1024];
 
   tree->Branch( "ev"       , &ev      , "ev/I"            );
-  tree->Branch( "fcr"      , &fcr     , "fcr/I"           );
   tree->Branch( "nch"      , &nch     , "nch/I"           );
   tree->Branch( "base"     , base     , "base[nch]/F"     );
   tree->Branch( "vamp"     , vamp     , "vamp[nch]/F"     );
@@ -105,7 +103,6 @@ int main( int argc, char* argv[] ) {
 
         ch            = atoi(words[2] .c_str());
         ev            = atoi(words[4] .c_str());
-        fcr           = atoi(words[6] .c_str());
         base     [ch] = atof(words[8] .c_str());
         vamp     [ch] = atof(words[11].c_str());
         vcharge  [ch] = atof(words[14].c_str());
